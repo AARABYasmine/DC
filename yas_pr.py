@@ -10,11 +10,14 @@ from scrapy import Selector
 
 PATH="C:\Program Files (x86)\chromedriver.exe"
 driver = webdriver.Chrome(PATH)
-driver.get("https://realpython.github.io/fake-jobs/")
-response=Selector(text=driver.page_source)
-elem=response.xpath('//*[@id="ResultsContainer"]')
+j=0
 Data_liste=[]
-for i in range(1,3):
+xpath_liste=[]
+for i in range(3,8):
+      driver.get("https://realpython.github.io/fake-jobs/")
+      response = Selector(text=driver.page_source)
+      time.sleep(4)
+      elem = response.xpath('//*[@id="ResultsContainer"]')
     #try:
     #  job_title1 = WebDriverWait(driver, 5).until(
     #        EC.presence_of_element_located((By.XPATH, '//h2'))
@@ -22,9 +25,20 @@ for i in range(1,3):
       #driver.switch_to.frame(driver.find_element(By.XPATH,'//*[@id="ResultsContainer"]/div[i]/div/div/div[1]/div[2]/h2')).text
       job_title1=response.xpath('//div['+str(i)+']//h2/text()').get()
       name1=response.xpath ('//div['+str(i)+']//h3/text()').get()
-      city1=response.xpath ('//div['+str(i)+']/div/div/div[2]/p[1]/text()').get().strip()
+      city1=response.xpath ('//div['+str(i)+']/div/div/div[2]/p[1]/text()').get()
       Date1=response.xpath ('//div['+str(i)+']/div/div/div[2]/p[2]/time/text()').get()
-      driver.find_element("xpath",'//div['+str(i)+']//a[2]').click()
+
+      url = response.xpath('//*[@id="ResultsContainer"]/div/div/div/footer/a[2]/@href').getall()
+      #driver.get(url)
+      xpath_liste.append(url)
+
+      for urls in xpath_liste:
+            #xpath_liste.append(urls)
+            #driver.find_element("xpath",'//div['+str(i)+']//a[2]').click()
+            #urls=response.xpath('//div['+str(j)+']//a[2]').click()
+            driver.get(urls[j])
+            response=Selector(text=driver.page_source)
+            description1=response.xpath('//*[@id="ResultsContainer"]/div/div/p[1]/text()').get()
       #description1 = WebDriverWait(driver, 5).until(
       #      EC.presence_of_element_located((By.XPATH, '//p[1]/text()'))
       # )
@@ -35,8 +49,9 @@ for i in range(1,3):
             'name' :name1,
             'city' :city1,
            'Date' :Date1,
-       #    'description': description1
+           'description': description1
       }
+      j=j+1
       Data_liste.append(dictionary)
       time.sleep(3)
 with open("DC.json", "w") as outfile:
